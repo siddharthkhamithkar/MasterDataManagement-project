@@ -13,7 +13,7 @@ def get_entity_collection():
 
 def create_entity(data: dict):
     collection = get_entity_collection()
-    data["created_at"] = datetime.utcnow()
+    data["created_at"] = datetime.now()
     result = collection.insert_one(data)
     return str(result.inserted_id)
 
@@ -53,7 +53,7 @@ def update_entity(entity_id: str, update_data: dict):
     try:
         # Validate that entity_id is a valid ObjectId
         object_id = ObjectId(entity_id)
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = datetime.now()
         updated = collection.find_one_and_update(
             {"_id": object_id},
             {"$set": update_data},

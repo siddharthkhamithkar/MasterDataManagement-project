@@ -6,7 +6,7 @@ from app.core.database import connect_to_mongo, close_mongo_connection, mongodb
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     connect_to_mongo()
-    print("Mongo Connected:", mongodb.db.name)  # 🔍 Sanity check
+    print("Mongo Connected:", mongodb.db.name)  # Sanity check
     assert mongodb.db is not None, "MongoDB connection failed"
     yield
     close_mongo_connection()

@@ -5,7 +5,7 @@ from typing import Any
 from pydantic_core import core_schema
 
 
-# ✅ Custom ObjectId support
+# Custom ObjectId support
 class PyObjectId(ObjectId):
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type: Any, handler: Any) -> core_schema.CoreSchema:
@@ -24,17 +24,17 @@ class PyObjectId(ObjectId):
     def __get_pydantic_json_schema__(cls, core_schema: core_schema.CoreSchema, handler: Any) -> dict:
         return {"type": "string"}
 
-# ✅ Request model for creating an entity
+# Request model for creating an entity
 class EntityCreate(BaseModel):
     name: str
     description: Optional[str] = None
 
-# ✅ Request model for updating an entity
+# Request model for updating an entity
 class EntityIn(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
 
-# ✅ Response model
+# Response model
 class EntityOut(BaseModel):
     id: PyObjectId = Field(alias="_id")
     name: str

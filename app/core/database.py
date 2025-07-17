@@ -11,7 +11,7 @@ class MongoDB:
     def connect(self):
         self.client = MongoClient(settings.MONGO_URI)
         self.db = self.client[settings.MONGO_DB]
-        print("[MongoDB] Connected to DB:", self.db.name)  # ✅ Should work now
+        print("[MongoDB] Connected to DB:", self.db.name)
 
     def close(self):
         if self.client:
