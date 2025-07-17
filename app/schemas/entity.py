@@ -46,3 +46,12 @@ class EntityOut(BaseModel):
         json_encoders = {
             ObjectId: str
         }
+
+# Update model for patch requests 
+class EntityUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    # add more optional fields
+
+    class Config:
+        extra = "forbid"  # reject fields not in schema

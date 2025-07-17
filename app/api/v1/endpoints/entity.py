@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.schemas.entity import EntityCreate, EntityOut, EntityIn
+from app.schemas.entity import EntityCreate, EntityOut, EntityIn, EntityUpdate
 from app.services.entity import create_entity, list_entities, get_entity_by_id, update_entity, delete_entity, get_entity_by_name
 from typing import List
 
@@ -28,12 +28,13 @@ def read_entity_by_name(entity_name: str):
         raise HTTPException(status_code=404, detail="Entity not found")
     return entity
 
-@router.put("/update_entity/{entity_id}", response_model=EntityOut)
-def update_existing_entity(entity_id: str, entity_data: EntityIn):
-    updated = update_entity(entity_id, entity_data.dict(exclude_unset=True))
-    if not updated:
-        raise HTTPException(status_code=404, detail="Entity not found")
-    return updated
+@router.patch("/{entity_id}", response_model=EntityOut)
+def update_existing_entity(entity_id: str, entity_data:EntityUpdate):
+    success = update_entity(entity_id, entity_data)
+    if not success:
+        raise HTTPException(status_code=404, detail="Entity not found or no changes")
+    
+    return get_entity_by_id(entity_id)
 
 @router.delete("/delete_entity/{entity_id}")
 def delete_existing_entity(entity_id: str):

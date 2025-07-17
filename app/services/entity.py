@@ -2,6 +2,7 @@ from app.core.database import mongodb
 from bson import ObjectId
 from datetime import datetime
 from pymongo.collection import ReturnDocument
+from pymongo.results import UpdateResult
 from app.core.database import mongodb
 
 
@@ -48,24 +49,20 @@ def get_entity_by_name(entity_name: str):
         del entity["_id"]
     return entity
 
-def update_entity(entity_id: str, update_data: dict):
-    collection = get_entity_collection()
-    try:
-        # Validate that entity_id is a valid ObjectId
-        object_id = ObjectId(entity_id)
-        update_data["updated_at"] = datetime.now()
-        updated = collection.find_one_and_update(
-            {"_id": object_id},
-            {"$set": update_data},
-            return_document=ReturnDocument.AFTER
-        )
-        if updated:
-            updated["id"] = str(updated["_id"])
-            del updated["_id"]
-        return updated
-    except Exception:
-        # If entity_id is not a valid ObjectId, return None
-        return None
+def update_entity(entity_id: str, entity_data: dict) -> bool:
+    collection = mongodb.db["entities"]
+
+    # Remove fields with None (so they are not updated)
+    update_data = {k: v for k, v in entity_data.model_dump(exclude_unset=True).items() if v is not None}
+
+    if not update_data:
+        return False  # Nothing to update
+
+    result: UpdateResult = collection.update_one(
+        {"_id": ObjectId(entity_id)},
+        {"$set": update_data}
+    )
+    return result.modified_count == 1
 
 def delete_entity(entity_id: str):
     collection = get_entity_collection()
