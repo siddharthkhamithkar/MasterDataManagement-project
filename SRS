@@ -1,1 +1,254 @@
-readme
+\documentclass[12pt]{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{courier}
+\renewcommand{\familydefault}{\sfdefault}
+
+\titleformat{\section}{\Large\bfseries}{\thesection.}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection.}{1em}{}
+
+\title{Software Requirements Specification (SRS)\\Master Data Management (MDM) System}
+\author{Prepared by: Siddharth N Khamithkar}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\subsection{Purpose}
+This document specifies the functional and non-functional requirements for a Master Data Management (MDM) system that centralizes, validates, manages, and exposes authoritative master data across enterprise applications.
+
+\subsection{Scope}
+This software will provide APIs to CRUD master data entities, manage metadata, enforce data quality rules, support entity versioning, and offer audit trails. It will use MongoDB for data persistence, FastAPI for service interfaces, and Docker for containerization and deployment.
+
+\subsection{Intended Audience}
+\begin{itemize}
+  \item Developers
+  \item DevOps Engineers
+  \item Data Governance Teams
+  \item Product Owners
+  \item System Integrators
+\end{itemize}
+
+\section{Overall Description}
+
+\subsection{Product Perspective}
+The MDM system will function as a central microservice and can be integrated with other business systems via REST APIs. It is a standalone service deployable in containers.
+
+\subsection{Product Functions}
+\begin{itemize}
+  \item Store and manage master data entities
+  \item Provide CRUD operations via REST APIs
+  \item Validate data using schemas and rules
+  \item Support soft deletes and versioning
+  \item Log and audit changes with metadata
+  \item Manage schemas and constraints
+  \item Sync/export to downstream systems
+\end{itemize}
+
+\subsection{User Classes}
+\begin{itemize}
+  \item Admin Users
+  \item Service Integrators
+  \item Data Stewards
+\end{itemize}
+
+\subsection{Operating Environment}
+\begin{itemize}
+  \item OS: Linux (Docker containers)
+  \item Backend: Python 3.11+
+  \item Framework: FastAPI
+  \item DB: MongoDB 6.0+
+  \item Deployment: Docker, Azure App Services/AWS ECS
+  \item API Docs: Swagger/OpenAPI
+\end{itemize}
+
+\subsection{Constraints}
+\begin{itemize}
+  \item Must use MongoDB
+  \item REST API principles
+  \item Container-based deployment
+\end{itemize}
+
+\section{Functional Requirements}
+
+\subsection{Entity Management}
+\begin{itemize}
+  \item FR1: CRUD for master data entities
+  \item FR2: Dynamic schema support
+  \item FR3: Prevent hard deletes; support soft deletes
+\end{itemize}
+
+\subsection{Schema Management}
+\begin{itemize}
+  \item FR4: Define/update schemas dynamically
+  \item FR5: Schema must include field types, constraints
+\end{itemize}
+
+\subsection{Data Validation}
+\begin{itemize}
+  \item FR6: Validate against schema
+  \item FR7: Provide validation error messages
+\end{itemize}
+
+\subsection{Versioning and History}
+\begin{itemize}
+  \item FR8: Track all record versions
+  \item FR9: Retrieve version history
+\end{itemize}
+
+\subsection{Auditing and Logging}
+\begin{itemize}
+  \item FR10: Log all operations with user/timestamp
+\end{itemize}
+
+\subsection{API Access}
+\begin{itemize}
+  \item FR11: Expose REST APIs
+  \item FR12: Secure APIs with token-based auth
+\end{itemize}
+
+\subsection{User Management (Optional)}
+\begin{itemize}
+  \item FR13: Basic or external user auth support
+\end{itemize}
+
+\section{Non-Functional Requirements}
+\begin{itemize}
+  \item Performance: Handle 1000 concurrent API requests
+  \item Scalability: Horizontal scaling
+  \item Reliability: Fault tolerance, retry logic
+  \item Maintainability: Modular architecture
+  \item Security: HTTPS, JWT, input sanitization
+  \item Availability: 99.9\% uptime
+  \item Documentation: Auto-generated OpenAPI, setup guides
+\end{itemize}
+
+\section{System Architecture}
+\begin{itemize}
+  \item API Layer (FastAPI)
+  \item Service Layer (Python)
+  \item Data Layer (MongoDB)
+  \item Auth Layer (JWT)
+  \item Containerization with Docker
+\end{itemize}
+
+\section{Data Models}
+
+\subsection*{Entity Schema}
+\begin{lstlisting}[basicstyle=\ttfamily, frame=single]
+{
+  "entity": "customer",
+  "fields": {
+    "name": { "type": "string", "required": true },
+    "email": { "type": "string", "required": true, "pattern": ".*@.*" },
+    "created_at": { "type": "datetime", "default": "now" }
+  }
+}
+\end{lstlisting}
+
+\subsection*{Entity Record}
+\begin{lstlisting}[basicstyle=\ttfamily, frame=single]
+{
+  "_id": "abc123",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "created_at": "2025-07-17T09:30:00",
+  "_version": 3,
+  "_audit": {
+    "created_by": "admin",
+    "last_modified": "2025-07-17T09:32:00"
+  }
+}
+\end{lstlisting}
+
+\section{Deployment and Environment Setup}
+\begin{itemize}
+  \item Containerized with Docker
+  \item Dev: Docker Compose
+  \item Prod: Kubernetes-ready
+  \item CI/CD: GitHub Actions or GitLab CI
+\end{itemize}
+
+\section{Future Enhancements}
+\begin{itemize}
+  \item Integration with external sources (ERP, CRM)
+  \item Fuzzy matching and deduplication engine
+  \item Role-based access control
+  \item GraphQL API support
+  \item Data lineage and impact analysis
+\end{itemize}
+
+\section{Development Plan (Phased)}
+
+\subsection*{Phase 0: Setup \& Scaffolding}
+\begin{itemize}
+  \item 0.1 Project structure
+  \item 0.2 Docker setup
+  \item 0.3 FastAPI init
+  \item 0.4 MongoDB connection
+  \item 0.5 Logging and config
+\end{itemize}
+
+\subsection*{Phase 1: Entity CRUD}
+\begin{itemize}
+  \item 1.1 Create entity
+  \item 1.2 Read entities
+  \item 1.3 Update entity
+  \item 1.4 Soft delete
+  \item 1.5 Unit tests
+\end{itemize}
+
+\subsection*{Phase 2: Schema Management}
+\begin{itemize}
+  \item 2.1 Create schema
+  \item 2.2 Fetch schema
+  \item 2.3 Update schema
+  \item 2.4 Schema validation
+\end{itemize}
+
+\subsection*{Phase 3: Data Validation}
+\begin{itemize}
+  \item 3.1 Validation engine
+  \item 3.2 Error reporting
+\end{itemize}
+
+\subsection*{Phase 4: Versioning \& History}
+\begin{itemize}
+  \item 4.1 Add \_version field
+  \item 4.2 Archive historical versions
+  \item 4.3 Retrieve version history
+\end{itemize}
+
+\subsection*{Phase 5: Auditing \& Logging}
+\begin{itemize}
+  \item 5.1 Add audit metadata
+  \item 5.2 Audit endpoints
+\end{itemize}
+
+\subsection*{Phase 6: API Access \& Auth}
+\begin{itemize}
+  \item 6.1 JWT authentication
+  \item 6.2 Auth middleware
+  \item 6.3 Swagger auto-docs
+\end{itemize}
+
+\subsection*{Phase 7: Optional - User Management}
+\begin{itemize}
+  \item 7.1 Register/login endpoints
+  \item 7.2 Roles and permissions
+\end{itemize}
+
+\subsection*{Phase 8: Deployment \& CI/CD}
+\begin{itemize}
+  \item 8.1 Finalize Dockerfiles
+  \item 8.2 Docker Compose setup
+  \item 8.3 CI/CD with GitHub Actions
+\end{itemize}
+
+\end{document}
