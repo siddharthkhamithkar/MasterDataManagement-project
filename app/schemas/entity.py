@@ -1,9 +1,7 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, validator
+from typing import Optional, Any
 from bson import ObjectId
-from typing import Any
 from pydantic_core import core_schema
-
 
 # Custom ObjectId support
 class PyObjectId(ObjectId):
@@ -26,13 +24,39 @@ class PyObjectId(ObjectId):
 
 # Request model for creating an entity
 class EntityCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
+    name: str = Field(..., min_length=3, max_length=50, description="Entity name (3–50 characters)")
+    description: Optional[str] = Field(None, max_length=200, description="Optional description")
 
-# Request model for updating an entity
+    @validator("name")
+    def name_must_be_alphanumeric(cls, v):
+        if not v.replace(" ", "").isalnum():
+            raise ValueError("Name must be alphanumeric (spaces allowed)")
+        return v
+
+# Request model for updating an entity (PUT)
 class EntityIn(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=3, max_length=50)
+    description: Optional[str] = Field(None, max_length=200)
+
+    @validator("name")
+    def name_must_be_alphanumeric(cls, v):
+        if v and not v.replace(" ", "").isalnum():
+            raise ValueError("Name must be alphanumeric")
+        return v
+
+# Update model for PATCH requests
+class EntityUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=3, max_length=50)
+    description: Optional[str] = Field(None, max_length=200)
+
+    @validator("name")
+    def name_must_be_alphanumeric(cls, v):
+        if v and not v.replace(" ", "").isalnum():
+            raise ValueError("Name must be alphanumeric")
+        return v
+
+    class Config:
+        extra = "forbid"  # Reject any unexpected fields
 
 # Response model
 class EntityOut(BaseModel):
@@ -46,12 +70,3 @@ class EntityOut(BaseModel):
         json_encoders = {
             ObjectId: str
         }
-
-# Update model for patch requests 
-class EntityUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    # add more optional fields
-
-    class Config:
-        extra = "forbid"  # reject fields not in schema
