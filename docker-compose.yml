@@ -1,4 +1,4 @@
-version: "3.9"
+version: '3.8'
 
 services:
   mdm-api:
@@ -6,7 +6,7 @@ services:
     container_name: mdm-api
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+    environment:
+      - PYTHONUNBUFFERED=1
     volumes:
-      - .:/app
+      - .:/code
