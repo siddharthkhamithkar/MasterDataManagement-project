@@ -1,44 +1,84 @@
-from fastapi import APIRouter, HTTPException
-from app.schemas.entity import EntityCreate, EntityOut, EntityIn, EntityUpdate
-from app.services.entity import create_entity, list_entities, get_entity_by_id, update_entity, delete_entity, get_entity_by_name
+from fastapi import APIRouter, HTTPException, Depends
+from bson import ObjectId
+from pymongo.errors import PyMongoError
+from app.schemas.entity import EntityCreate, EntityOut, EntityIn, EntityUpdate, HistoryOut
+from app.services.entity import create_entity, list_entities, get_entity_by_id, update_entity, delete_entity, get_entity_by_name, get_entity_history_collection, get_entity_history_by_id, list_history 
 from typing import List
+from app.api.v1.endpoints.token import verify_token
 
 router = APIRouter()
 
-@router.post("/create_entity/", response_model=str)
-def add_entity(payload: EntityCreate):
-    entity_id = create_entity(payload.dict())
-    return entity_id
+@router.post("/create_entity/", response_model=str, dependencies=[Depends(verify_token)])
+async def add_entity(payload: EntityCreate):
+    try:
+        entity_id = await create_entity(payload.dict())
+        return entity_id
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-@router.get("/", response_model=List[EntityOut])
-def get_entities():
-    return list_entities()
+@router.get("/", response_model=List[EntityOut], dependencies=[Depends(verify_token)])
+async def get_entities():
+    try:
+        return list_entities()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-@router.get("/get_entity/id/{entity_id}", response_model=EntityOut)
+@router.get("/get_entity/id/{entity_id}", response_model=EntityOut, dependencies=[Depends(verify_token)])
 def read_entity_by_id(entity_id: str):
-    entity = get_entity_by_id(entity_id)
-    if not entity:
-        raise HTTPException(status_code=404, detail="Entity not found")
-    return entity
+    try:
+        entity = get_entity_by_id(entity_id)
+        if not entity:
+            raise HTTPException(status_code=404, detail="Entity not found")
+        return entity
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-@router.get("/get_entity/name/{entity_name}", response_model=EntityOut)
+@router.get("/get_entity/name/{entity_name}", response_model=EntityOut, dependencies=[Depends(verify_token)])
 def read_entity_by_name(entity_name: str):
-    entity = get_entity_by_name(entity_name)
-    if not entity:
-        raise HTTPException(status_code=404, detail="Entity not found")
-    return entity
+    try:
+        entity = get_entity_by_name(entity_name)
+        if not entity:
+            raise HTTPException(status_code=404, detail="Entity not found")
+        return entity
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-@router.patch("/{entity_id}", response_model=EntityOut)
-def update_existing_entity(entity_id: str, entity_data:EntityUpdate):
-    success = update_entity(entity_id, entity_data)
-    if not success:
-        raise HTTPException(status_code=404, detail="Entity not found or no changes")
-    
-    return get_entity_by_id(entity_id)
+@router.patch("/{entity_id}", response_model=EntityOut, dependencies=[Depends(verify_token)])
+async def update_existing_entity(entity_id: str, entity_data:EntityUpdate):
+    try:
+        success = await update_entity(entity_id, entity_data)
+        if not success:
+            raise HTTPException(status_code=404, detail="Entity not found or no changes")
+        return get_entity_by_id(entity_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-@router.delete("/delete_entity/{entity_id}")
-def delete_existing_entity(entity_id: str):
-    success = delete_entity(entity_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Entity not found")
-    return {"detail": "Entity deleted"}
+@router.delete("/delete_entity/{entity_id}", dependencies=[Depends(verify_token)])
+async def delete_existing_entity(entity_id: str):
+    try:
+        success = await delete_entity(entity_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Entity not found")
+        return {"detail": "Entity deleted"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+@router.get("/entities/{entity_id}/history", response_model=list[HistoryOut], dependencies=[Depends(verify_token)])
+async def get_entity_history(entity_id: str):
+    try:
+        history = get_entity_history_by_id(entity_id)
+        if not history:
+            raise HTTPException(status_code=404, detail="No history found for this entity")
+        return history
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+
+'''
+# to be added later
+@router.get("/entities/history", response_model=List[EntityOut], dependencies=[Depends(verify_token)])
+async def get_all_history():
+    try:
+        return list_history()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+'''

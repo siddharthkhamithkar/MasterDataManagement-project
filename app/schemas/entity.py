@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, validator
 from typing import Optional, Any
 from bson import ObjectId
 from pydantic_core import core_schema
+from datetime import datetime
 
 # Custom ObjectId support
 class PyObjectId(ObjectId):
@@ -63,10 +64,25 @@ class EntityOut(BaseModel):
     id: PyObjectId = Field(alias="_id")
     name: str
     description: Optional[str] = None
+    version: Optional[int] = 1  # default to 1 if missing
 
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
+        json_encoders = {ObjectId: str}
+
+class HistoryOut(BaseModel):
+    id: str = Field(..., alias="_id")
+    entity_id: str
+    version: int
+    data: dict
+    operation: str
+    timestamp: datetime
+
+    class Config:
+        populate_by_name = True  # allow "id" to populate from "_id"
+        arbitrary_types_allowed = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
