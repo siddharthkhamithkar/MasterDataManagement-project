@@ -1,6 +1,4 @@
 from fastapi import APIRouter, HTTPException, Depends
-from bson import ObjectId
-from pymongo.errors import PyMongoError
 from app.schemas.entity import EntityCreate, EntityOut, EntityIn, EntityUpdate, HistoryOut
 from app.services.entity import create_entity, list_entities, get_entity_by_id, update_entity, delete_entity, get_entity_by_name, get_entity_history_collection, get_entity_history_by_id
 from typing import List

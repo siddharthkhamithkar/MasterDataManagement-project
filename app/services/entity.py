@@ -1,24 +1,10 @@
 from app.core.database import mongodb
 from bson import ObjectId
-from datetime import datetime, timedelta
-from pymongo.collection import ReturnDocument
-from pymongo.results import UpdateResult
-from app.core.database import mongodb
+from datetime import datetime
 from app.schemas.entity import EntityUpdate
-from fastapi import Request, HTTPException, status, Depends
-from jose import jwt, JWTError
-import copy
-from app.utils.utils import serialize_doc
+from fastapi import HTTPException
+from app.utils.utils import serialize_doc, get_entity_collection, get_entity_history_collection, save_history
 
-def get_entity_collection():
-    if mongodb.db is None:
-        raise RuntimeError("Database not initialized. Did you forget to call connect_to_mongo?")
-    return mongodb.db["entities"]
-
-def get_entity_history_collection():
-    if mongodb.db is None:
-        raise RuntimeError("Database not initialized. Did you forget to call connect_to_mongo?")
-    return mongodb.db["entity_history"]
 
 async def create_entity(data: dict):
     collection = get_entity_collection()
@@ -79,19 +65,6 @@ async def update_entity(entity_id: str, update_data: EntityUpdate):
 
     updated = collection.find_one({"_id": ObjectId(entity_id)})
     return updated
-
-async def save_history(entity: dict, operation: str):
-    entity_history_collection = get_entity_history_collection()
-    history_doc = {
-        "entity_id": entity["_id"],
-        "version": entity.get("version", 1),
-        "data": copy.deepcopy(entity),
-        "operation": operation,
-        "timestamp": datetime.utcnow()
-    }
-
-    entity_history_collection.insert_one(history_doc)
-
 
 async def delete_entity(entity_id: str):
     collection = get_entity_collection()
