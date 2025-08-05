@@ -8,6 +8,7 @@ from app.schemas.entity import EntityUpdate
 from fastapi import Request, HTTPException, status, Depends
 from jose import jwt, JWTError
 import copy
+from app.utils.utils import serialize_doc
 
 def get_entity_collection():
     if mongodb.db is None:
@@ -49,11 +50,15 @@ def get_entity_by_id(entity_id: str):
 
 def get_entity_by_name(entity_name: str):
     collection = get_entity_collection()
-    entity = collection.find_one({"name": entity_name})
-    if entity:
-        entity["id"] = str(entity["_id"])
-        del entity["_id"]
-    return entity
+    entities = []
+    for entity in collection.find():
+        if entity.get("name") == entity_name:
+            entity["id"] = str(entity["_id"])
+            del entity["_id"]
+            entities.append(entity)
+    if not entities:
+        raise HTTPException(status_code=404, detail="Entity not found")
+    return entities
 
 async def update_entity(entity_id: str, update_data: EntityUpdate):
     collection = get_entity_collection()
@@ -103,14 +108,6 @@ async def delete_entity(entity_id: str):
 
     except Exception:
         return False
-
-def serialize_doc(doc):
-    for key, value in doc.items():
-        if isinstance(value, ObjectId):
-            doc[key] = str(value)
-        elif isinstance(value, dict):
-            doc[key] = serialize_doc(value)
-    return doc
 
 def get_entity_history_by_id(entity_id: str):
     history_collection = get_entity_history_collection()

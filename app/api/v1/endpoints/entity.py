@@ -33,8 +33,8 @@ def read_entity_by_id(entity_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-@router.get("/get_entity/name/{entity_name}", response_model=EntityOut, dependencies=[Depends(verify_token)])
-def read_entity_by_name(entity_name: str):
+@router.get("/get_entity/name/{entity_name}", response_model=List[EntityOut], dependencies=[Depends(verify_token)])
+async def read_entity_by_name(entity_name: str):
     try:
         entity = get_entity_by_name(entity_name)
         if not entity:
