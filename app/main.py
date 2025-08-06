@@ -10,7 +10,6 @@ from fastapi.openapi.utils import get_openapi
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     connect_to_mongo()
-    print("Mongo Connected:", mongodb.db.name)  # Sanity check
     assert mongodb.db is not None, "MongoDB connection failed"
     yield
     close_mongo_connection()
