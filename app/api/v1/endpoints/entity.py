@@ -1,10 +1,16 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.schemas.entity import EntityCreate, EntityOut, EntityIn, EntityUpdate, HistoryOut
+from app.schemas.entity import EntityCreate, EntityOut, EntityIn, EntityUpdate, HistoryOut, UserCreate, Token
 from app.services.entity import create_entity, list_entities, get_entity_by_id, update_entity, delete_entity, get_entity_by_name, get_entity_history_collection, get_entity_history_by_id
+
 from typing import List
 from app.api.v1.endpoints.token import verify_token
+from pydantic import BaseModel
+from datetime import datetime, timedelta, timezone
+from jose import jwt
+from app.core.config import settings
 
 router = APIRouter()
+
 
 @router.post("/create_entity/", response_model=str, dependencies=[Depends(verify_token)])
 async def add_entity(payload: EntityCreate):

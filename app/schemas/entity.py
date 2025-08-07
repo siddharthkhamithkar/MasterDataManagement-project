@@ -86,3 +86,40 @@ class HistoryOut(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+# User models
+class UserCreate(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50, description="Username (3-50 characters)")
+    email: str = Field(..., description="User email address")
+    password: str = Field(..., min_length=6, description="Password (minimum 6 characters)")
+    full_name: Optional[str] = Field(None, max_length=100, description="Full name of the user")
+    
+    @validator("username")
+    def username_must_be_alphanumeric(cls, v):
+        if not v.replace("_", "").replace("-", "").isalnum():
+            raise ValueError("Username must be alphanumeric (underscores and hyphens allowed)")
+        return v.lower()
+    
+    @validator("email")
+    def validate_email(cls, v):
+        # Simple email validation
+        if "@" not in v or "." not in v.split("@")[-1]:
+            raise ValueError("Invalid email format")
+        return v.lower()
+
+class UserOut(BaseModel):
+    id: PyObjectId = Field(alias="_id")
+    username: str
+    email: str
+    full_name: Optional[str] = None
+    created_at: datetime
+    is_active: bool = True
+    
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str

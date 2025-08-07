@@ -19,7 +19,7 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(token.router, prefix="/api/v1", tags=["Auth"])
 app.include_router(entity.router, prefix="/api/v1/entities", tags=["Entities"])
 
-@app.get("/ping", tags=["Health"])
+@app.get("/", tags=["Health"])
 def ping():
     return {"status": "ok"}
 
