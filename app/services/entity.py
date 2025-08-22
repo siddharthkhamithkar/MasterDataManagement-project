@@ -1,14 +1,21 @@
 from app.core.database import mongodb
 from bson import ObjectId
 from datetime import datetime
-from app.schemas.entity import EntityUpdate
+from app.schemas.entity import CustomerUpdate, CustomerHistoryOut
 from fastapi import HTTPException
 from app.utils.utils import serialize_doc, get_entity_collection, get_entity_history_collection, save_history
 
 
 async def create_entity(data: dict):
     collection = get_entity_collection()
-    data["created_at"] = datetime.now()
+
+    # Generate ObjectId
+    object_id = ObjectId()
+    data["_id"] = object_id
+    data["customerId"] = str(object_id)
+
+    data["created_at"] = datetime.utcnow()
+
     result = collection.insert_one(data)
     await save_history(data, "create")
     return str(result.inserted_id)
@@ -46,7 +53,7 @@ def get_entity_by_name(entity_name: str):
         raise HTTPException(status_code=404, detail="Entity not found")
     return entities
 
-async def update_entity(entity_id: str, update_data: EntityUpdate):
+async def update_entity(entity_id: str, update_data: CustomerUpdate):
     collection = get_entity_collection()
     existing = collection.find_one({"_id": ObjectId(entity_id)})
     if not existing:
@@ -82,9 +89,18 @@ async def delete_entity(entity_id: str):
     except Exception:
         return False
 
-def get_entity_history_by_id(entity_id: str):
+def get_entity_history_by_id(entity_id: str) -> list[CustomerHistoryOut]:
     history_collection = get_entity_history_collection()
     object_id = ObjectId(entity_id)
+
     cursor = history_collection.find({"entity_id": object_id}).sort("version", 1)
-    history = [serialize_doc(doc) for doc in cursor]
+
+    history = []
+    for doc in cursor:
+        doc = serialize_doc(doc)
+
+        history.append(CustomerHistoryOut(**doc))
+
     return history
+
+#TODO: create function to search through any of the available attributes, as a replacement for get_entity_by_name

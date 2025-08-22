@@ -11,6 +11,9 @@ def serialize_doc(doc):
             doc[key] = str(value)
         elif isinstance(value, dict):
             doc[key] = serialize_doc(value)
+    if "_id" in doc:
+        doc["_id"] = str(doc["_id"])
+        doc["customer_id"] = doc["_id"]
     return doc
 
 def get_entity_collection():
