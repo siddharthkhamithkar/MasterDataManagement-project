@@ -145,16 +145,6 @@ class CustomerCreate(BaseModel):
     consent: Optional[Consent] = None
     identifiers: Optional[Identifiers] = None
 
-'''
-class CustomerIn(BaseModel): 
-    personalInfo: Optional[PersonalInfo]
-    contactInfo: Optional[ContactInfo]
-    preferences: Optional[Preferences]
-    behavioralData: Optional[BehavioralData]
-    consent: Optional[Consent]
-    identifiers: Optional[Identifiers]
-'''
-
 class CustomerUpdate(BaseModel): 
     customerId: Optional[str] = None 
     personalInfo: Optional[PersonalInfo] = None
