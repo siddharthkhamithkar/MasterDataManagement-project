@@ -1,11 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.schemas.entity import CustomerCreate, CustomerOut, CustomerIn, CustomerUpdate, CustomerHistoryOut, UserCreate, Token
+from app.schemas.entity import CustomerCreate, CustomerOut, CustomerUpdate, CustomerHistoryOut, Token
 from app.services.entity import create_entity, list_entities, get_entity_by_id, update_entity, delete_entity, get_entity_history_collection, get_entity_history_by_id, get_entity_by_attribute
 from typing import List
 from app.api.v1.endpoints.token import verify_token
-from pydantic import BaseModel
-from datetime import datetime, timedelta, timezone
-from jose import jwt
 from app.core.config import settings
 
 router = APIRouter()

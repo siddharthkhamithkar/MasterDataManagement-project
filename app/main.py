@@ -2,9 +2,7 @@ from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager 
 from app.api.v1.endpoints import entity, token
 from app.core.database import connect_to_mongo, close_mongo_connection, mongodb
-from fastapi.security import OAuth2PasswordBearer, HTTPBearer
-from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
-from fastapi.openapi.models import OAuthFlowPassword
+from fastapi.security import HTTPBearer
 from fastapi.openapi.utils import get_openapi
 
 @asynccontextmanager

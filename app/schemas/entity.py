@@ -138,7 +138,6 @@ class Identifiers(BaseModel):
 #Main Customer Models
 
 class CustomerCreate(BaseModel):
-    customerId: Optional[str] = None  # server sets this
     personalInfo: PersonalInfo
     contactInfo: ContactInfo
     preferences: Optional[Preferences] = None
@@ -146,7 +145,7 @@ class CustomerCreate(BaseModel):
     consent: Optional[Consent] = None
     identifiers: Optional[Identifiers] = None
 
-
+'''
 class CustomerIn(BaseModel): 
     personalInfo: Optional[PersonalInfo]
     contactInfo: Optional[ContactInfo]
@@ -154,7 +153,7 @@ class CustomerIn(BaseModel):
     behavioralData: Optional[BehavioralData]
     consent: Optional[Consent]
     identifiers: Optional[Identifiers]
-
+'''
 
 class CustomerUpdate(BaseModel): 
     customerId: Optional[str] = None 
