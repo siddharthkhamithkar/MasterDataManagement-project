@@ -56,8 +56,8 @@ async def log_in(login_data: LoginRequest):
         # Generate JWT token for authenticated user
         expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode = {
-            "sub": user["username"],  # Use username as subject
-            "user_id": str(user["_id"]),  # Include user ID for reference
+            "sub": user["username"],
+            "user_id": str(user["_id"]),
             "exp": int(expire.timestamp())
         }
         

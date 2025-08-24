@@ -7,8 +7,6 @@ from app.utils.utils import serialize_doc, get_entity_collection, get_entity_his
 
 async def create_entity(data: dict):
     collection = get_entity_collection()
-
-    # Generate ObjectId
     object_id = ObjectId()
     data["_id"] = object_id
     data["customerId"] = str(object_id)

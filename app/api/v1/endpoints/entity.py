@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.schemas.entity import CustomerCreate, CustomerOut, CustomerUpdate, CustomerHistoryOut, Token
-from app.services.entity import create_entity, list_entities, get_entity_by_id, update_entity, delete_entity, get_entity_history_collection, get_entity_history_by_id, get_entity_by_attribute
+from app.schemas.entity import CustomerCreate, CustomerOut, CustomerUpdate, CustomerHistoryOut
+from app.services.entity import create_entity, list_entities, get_entity_by_id, update_entity, delete_entity, get_entity_history_by_id, get_entity_by_attribute
 from typing import List
 from app.api.v1.endpoints.token import verify_token
 from app.core.config import settings
