@@ -84,6 +84,7 @@ class PersonalInfo(BaseModel):
 
 class ContactInfo(BaseModel):
     email: Optional[EmailStr]
+    countryCode: Optional[str] = Field(None, min_length=3, max_length=3)
     phoneNumber: Optional[str] = Field(None, min_length=5, max_length=20)
     address: Optional[Address]
 
@@ -124,8 +125,8 @@ class SocialIds(BaseModel):
 
 
 class ExternalSystemId(BaseModel):
-    system: str = Field(..., max_length=100)
-    id: str = Field(..., max_length=100)
+    system: Optional[str] = Field(..., max_length=100)
+    id: Optional[str] = Field(..., max_length=100)
 
 
 class Identifiers(BaseModel):
@@ -144,12 +145,6 @@ class CustomerCreate(BaseModel):
     behavioralData: Optional[BehavioralData] = None
     consent: Optional[Consent] = None
     identifiers: Optional[Identifiers] = None
-
-    @validator("customerId")
-    def id_must_be_alphanumeric(cls, v):
-        if not v.replace("-", "").replace("_", "").isalnum():
-            raise ValueError("customerId must be alphanumeric (dashes/underscores allowed)")
-        return v
 
 
 class CustomerIn(BaseModel): 

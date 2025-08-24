@@ -4,6 +4,8 @@ from datetime import datetime
 from app.schemas.entity import CustomerUpdate, CustomerHistoryOut
 from fastapi import HTTPException
 from app.utils.utils import serialize_doc, get_entity_collection, get_entity_history_collection, save_history
+from typing import List
+import re
 
 
 async def create_entity(data: dict):
@@ -40,18 +42,6 @@ def get_entity_by_id(entity_id: str):
         return entity
     except Exception:
         return None
-
-def get_entity_by_name(entity_name: str):
-    collection = get_entity_collection()
-    entities = []
-    for entity in collection.find():
-        if entity.get("name") == entity_name:
-            entity["id"] = str(entity["_id"])
-            del entity["_id"]
-            entities.append(entity)
-    if not entities:
-        raise HTTPException(status_code=404, detail="Entity not found")
-    return entities
 
 async def update_entity(entity_id: str, update_data: CustomerUpdate):
     collection = get_entity_collection()
@@ -104,3 +94,68 @@ def get_entity_history_by_id(entity_id: str) -> list[CustomerHistoryOut]:
     return history
 
 #TODO: create function to search through any of the available attributes, as a replacement for get_entity_by_name
+
+def get_entity_by_attribute(entity_attribute: str, entity_value: str):
+    ALLOWED_FIELDS = {
+    "customerId",
+    "personalInfo.firstName",
+    "personalInfo.lastName",
+    "personalInfo.dateOfBirth",
+    "personalInfo.gender",
+    "personalInfo.nationality",
+    "contactInfo.email",
+    "contactInfo.countryCode",
+    "contactInfo.phoneNumber",
+    "contactInfo.address.street",
+    "contactInfo.address.city",
+    "contactInfo.address.state",
+    "contactInfo.address.postalCode",
+    "contactInfo.address.country",
+    "preferences.language",
+    "preferences.currency",
+    "preferences.interests",
+    "preferences.communicationChannels",
+    "behavioralData.lastVisitDate",
+    "behavioralData.lifetimeValue",
+    "behavioralData.visitsCount",
+    "behavioralData.averageSpend",
+    "behavioralData.preferredLocation",
+    "behavioralData.recentBookings.bookingId",
+    "behavioralData.recentBookings.date",
+    "behavioralData.recentBookings.location",
+    "behavioralData.recentBookings.serviceType",
+    "consent.marketing",
+    "consent.profiling",
+    "consent.thirdPartySharing",
+    "identifiers.loyaltyId",
+    "identifiers.socialIds.facebook",
+    "identifiers.socialIds.instagram",
+    "identifiers.socialIds.twitter",
+    "identifiers.externalSystemIds.system",
+    "identifiers.externalSystemIds.id",
+    }
+
+    collection = get_entity_collection()
+
+    if entity_attribute not in ALLOWED_FIELDS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid search field '{entity_attribute}'."
+        )
+
+    query = {entity_attribute: entity_value}
+    cursor = collection.find(query)
+
+    results = []
+    for entity in cursor:
+        entity["id"] = str(entity["_id"])
+        del entity["_id"]
+        results.append(entity)
+
+    if not results:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No entity found for {entity_attribute}={entity_value}"
+        )
+
+    return results
